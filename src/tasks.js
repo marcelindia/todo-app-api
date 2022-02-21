@@ -2,7 +2,11 @@ const { response } = require("express");
 const { connectDb } = require("./connectDb");
 
 exports.createTask = (req, res) => {
-  const newTask = req.body;
+  const newTask = {
+    task: req.body.task,
+    done: false,
+    deleted: false,
+  };
   const db = connectDb();
   db.collection("tasks")
     .add(newTask)
@@ -24,14 +28,26 @@ exports.getTasks = (req, res) => {
     })
     .catch((err) => res.status(500).send(err));
 };
-
+//Returns Everything
 exports.updateTask = (req, res) => {
   const { taskId } = req.params;
-  const isDone = req.body.isDone;
+  const isDone = req.body.done;
   const db = connectDb();
   db.collection("tasks")
     .doc(taskId)
     .update({ done: isDone })
     .then((doc) => res.status(202).send(doc))
+    .catch((err) => res.status(500).send(err));
+};
+
+exports.deleteTask = (req, res) => {
+  const { taskId } = req.params;
+  const db = connectDb();
+  db.collection("tasks")
+    .doc(taskId)
+    .delete()
+    .then(() => {
+      res.send("Deleted");
+    })
     .catch((err) => res.status(500).send(err));
 };
